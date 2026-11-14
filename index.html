@@ -831,6 +831,8 @@ input,select,textarea{font-size:16px}
 @media(max-width:560px){:root{--display:var(--body)}.row-body h3,.card-body h3,.sheet-info h2,.detail-block h3,.panel h3,.news-card h3,.cta-business h2,.mini-body strong,.brand-name{font-weight:800;letter-spacing:-.01em}.sheet-info h2{font-size:30px;line-height:1.05}}
 
 /* ---- Modo "Busca rápida" (celular) ---- */
+.footer-modo{display:none;border:0;background:none;padding:4px 0;color:var(--coral);font:700 12px inherit;cursor:pointer}
+@media(max-width:720px){[data-modo=completo] .footer-modo{display:block}}
 .modo-toggle{display:none}
 .stories-head{display:none}
 @media(max-width:720px){
@@ -885,7 +887,7 @@ input,select,textarea{font-size:16px}
 
 <footer>
   <div><div class="footer-brand" id="footer-brand">Guia Busca</div><div id="footer-sub">Guia de empresas e serviços de Iracemápolis</div><div id="demo-note" class="demo-note" hidden>Dados de demonstração: empresas, telefones e fotos são fictícios.</div></div>
-  <div class="footer-links"><a href="#perfil" data-go="perfil">Sua empresa no guia</a><a href="#formalizar" data-go="formalizar">Formalize seu negócio</a><a href="privacidade.html">Privacidade</a><span id="source-note" hidden></span></div>
+  <div class="footer-links"><a href="#perfil" data-go="perfil">Sua empresa no guia</a><a href="#formalizar" data-go="formalizar">Formalize seu negócio</a><button type="button" class="footer-modo" data-setmodo="rapido">⚡ Voltar à busca rápida</button><a href="privacidade.html">Privacidade</a><span id="source-note" hidden></span></div>
 </footer>
 
 <div class="veil" id="veil" hidden>
@@ -1405,7 +1407,7 @@ function homeView() {
   }
   const featured = COMPANIES.filter((e) => e.plan === 'premium' || e.plan === 'destaque').slice(0, 6);
   const shown = featured.length ? featured : filtered().slice(0, 6);
-  return `${heroView()}
+  return `${modoToggle()}${heroView()}
     <section class="section"><div class="section-head"><div><h2>Explore por <em>categoria</em></h2><p>Do essencial ao especial, tudo organizado.</p></div></div>${categoryTiles()}</section>
     <section class="section">${sectionHead('Escolha pelo que você precisa', 'Atalhos rápidos para resolver o dia.')}${intentTiles()}</section>
     ${bannersView()}
