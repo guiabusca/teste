@@ -1,0 +1,106 @@
+rules_version = '2';
+// REGRAS COMPLETAS do Firebase do Guia Busca (projeto novo, só do Guia).
+// UID do administrador já preenchido. Cole tudo em Firebase > Firestore Database > Regras > Publicar.
+// Qualquer coleção não listada aqui fica bloqueada (regra padrão: negar).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid in ['8SxJ8UhggNV6pOralxFqs3hsf2h1'];
+    }
+
+    // ---- Guia Busca ----
+    match /ira_negocios/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /ira_categorias/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /ira_banners/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /ira_novidades/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /ira_plantoes/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /ira_configuracoes/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /ira_contatos/{id} {
+      // Visitantes podem registrar somente um evento de clique; só o administrador lê.
+      allow create: if request.resource.data.keys().hasOnly(['negocioId','tipo','origem','criadoEm'])
+                    && request.resource.data.tipo in ['whatsapp','ligar','instagram','facebook']
+                    && request.resource.data.negocioId is string && request.resource.data.negocioId.size() < 80
+                    && request.resource.data.origem is string && request.resource.data.origem.size() < 40
+                    && request.resource.data.criadoEm == request.time;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+    match /ira_cadastros/{id} {
+      // O formulário público cria pedido pendente; o painel administrativo decide o que fazer.
+      allow create: if request.resource.data.keys().hasOnly(['nome','categoria','whatsapp','plano','periodo','aceite','origem','bairro','endereco','horario','servicos','descricao','telefone','site','instagram','tipoNegocio','cnpj','status','criadoEm'])
+                    && request.resource.data.nome is string && request.resource.data.nome.size() > 1 && request.resource.data.nome.size() <= 80
+                    && request.resource.data.categoria is string && request.resource.data.categoria.size() <= 40
+                    && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 25
+                    && (!('plano' in request.resource.data) || request.resource.data.plano in ['gratis','presenca','destaque','premium'])
+                    && (!('aceite' in request.resource.data) || request.resource.data.aceite == true)
+                    && (!('origem' in request.resource.data) || (request.resource.data.origem is string && request.resource.data.origem.size() <= 40))
+                    && (!('periodo' in request.resource.data) || request.resource.data.periodo in [1,3,6,12])
+                    && (!('tipoNegocio' in request.resource.data) || request.resource.data.tipoNegocio in ['cnpj','mei','autonomo','naotem'])
+                    && (!('cnpj' in request.resource.data) || (request.resource.data.cnpj is string && request.resource.data.cnpj.size() == 14))
+                    && (!('bairro' in request.resource.data) || (request.resource.data.bairro is string && request.resource.data.bairro.size() <= 60))
+                    && (!('endereco' in request.resource.data) || (request.resource.data.endereco is string && request.resource.data.endereco.size() <= 120))
+                    && (!('horario' in request.resource.data) || (request.resource.data.horario is string && request.resource.data.horario.size() <= 80))
+                    && (!('servicos' in request.resource.data) || (request.resource.data.servicos is string && request.resource.data.servicos.size() <= 200))
+                    && (!('descricao' in request.resource.data) || (request.resource.data.descricao is string && request.resource.data.descricao.size() <= 300))
+                    && (!('telefone' in request.resource.data) || (request.resource.data.telefone is string && request.resource.data.telefone.size() <= 16))
+                    && (!('site' in request.resource.data) || (request.resource.data.site is string && request.resource.data.site.size() <= 120))
+                    && (!('instagram' in request.resource.data) || (request.resource.data.instagram is string && request.resource.data.instagram.size() <= 80))
+                    && request.resource.data.status == 'novo'
+                    && request.resource.data.criadoEm == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+    match /ira_metricas/{dia} {
+      // Contadores diários anônimos do piloto (visitas, buscas, origem do link). Visitantes só podem SOMAR 1 por vez;
+      // não podem diminuir nem criar campos novos. Só o administrador lê.
+      allow create: if request.resource.data.keys().hasOnly(['dia','visitas','unicos','buscas','buscasVazias','origens'])
+                    && request.resource.data.dia == dia
+                    && request.resource.data.get('visitas', 0) <= 1
+                    && request.resource.data.get('unicos', 0) <= 1
+                    && request.resource.data.get('buscas', 0) <= 1
+                    && request.resource.data.get('buscasVazias', 0) <= 1
+                    && request.resource.data.get('origens', {}).size() <= 1;
+      allow update: if request.resource.data.keys().hasOnly(['dia','visitas','unicos','buscas','buscasVazias','origens'])
+                    && request.resource.data.dia == resource.data.dia
+                    && request.resource.data.get('visitas', 0) - resource.data.get('visitas', 0) in [0, 1]
+                    && request.resource.data.get('unicos', 0) - resource.data.get('unicos', 0) in [0, 1]
+                    && request.resource.data.get('buscas', 0) - resource.data.get('buscas', 0) in [0, 1]
+                    && request.resource.data.get('buscasVazias', 0) - resource.data.get('buscasVazias', 0) in [0, 1]
+                    && request.resource.data.get('origens', {}).size() <= 20;
+      allow read: if isAdmin();
+      allow delete: if false;
+    }
+    match /ira_buscas/{id} {
+      // O que as pessoas procuraram (texto curto, sem identificação). Só o administrador lê.
+      allow create: if request.resource.data.keys().hasOnly(['termo','resultados','criadoEm'])
+                    && request.resource.data.termo is string && request.resource.data.termo.size() >= 3 && request.resource.data.termo.size() <= 60
+                    && request.resource.data.resultados is int && request.resource.data.resultados >= 0 && request.resource.data.resultados <= 9999
+                    && request.resource.data.criadoEm == request.time;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+    match /ira_mensagens/{id} {
+      // Textos de venda/atendimento: só o administrador lê e edita.
+      allow read, write: if isAdmin();
+    }
+  }
+}
