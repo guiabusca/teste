@@ -12,8 +12,19 @@ export const firebaseConfig = {
 // Altere para true antes de publicar o painel em produção.
 export const ADMIN_AUTH_REQUIRED = true;
 
-// Marca e cidade. Para abrir outra cidade ou outro segmento (ex.: Guia Busca Hotéis),
-// copie o projeto e troque apenas este bloco, os dados e as categorias.
+// Cidades atendidas. O guia funciona com várias cidades no mesmo site:
+//   id     = identificador curto, sem acento ou espaço (é o que fica gravado em cada empresa)
+//   ativa  = true aparece para escolher; false aparece como "em breve" (serve para medir interesse)
+// A PRIMEIRA cidade da lista é a padrão: empresas sem cidade informada pertencem a ela.
+// Para abrir uma cidade nova: acrescente uma linha aqui e escolha a cidade ao cadastrar as empresas no painel.
+export const CIDADES = [
+  { id: "iracemapolis", nome: "Iracemápolis", uf: "SP", ativa: true },
+  // { id: "limeira", nome: "Limeira", uf: "SP", ativa: false },
+  // { id: "americana", nome: "Americana", uf: "SP", ativa: false },
+];
+
+// Marca. A cidade (city/uf) abaixo é só o valor inicial: o site troca sozinho conforme a cidade escolhida em CIDADES.
+// Para outro segmento (ex.: Guia Busca Hotéis), copie o projeto e troque este bloco, os dados e as categorias.
 export const BRAND = {
   name: "Guia Busca",
   tagline: "O que você procura, perto de você",
