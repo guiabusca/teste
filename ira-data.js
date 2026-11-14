@@ -66,6 +66,7 @@ export function normalizar(n, i = 0, hoje = new Date()) {
     photos: Math.min(fotosLimite, Math.max(1, Number(n.fotos) || 1)),
     ativo: n.ativo !== false,
     ordem: n.ordem ?? i,
+    cidade: String(n.cidade || n.cidadeId || "").trim().toLowerCase(),
     verified: !!(n.verificado || n.verified),
     tipo: TIPOS_NEGOCIO[n.tipoNegocio] ? n.tipoNegocio : "",
     cnpjConferido: !!n.cnpjConferido && !!soDigitos(n.cnpj) && cnpjValido(n.cnpj),
@@ -287,6 +288,8 @@ export async function enviarCadastro({ nome, categoria, whatsapp, plano = "grati
     const v = String(extra[k] || "").trim().slice(0, max);
     if (v) payload[k] = v;
   }
+  const cid = String(extra.cidade || "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
+  if (cid) payload.cidade = cid;
   if (TIPOS_NEGOCIO[extra.tipoNegocio]) payload.tipoNegocio = extra.tipoNegocio;
   const cnpj = soDigitos(extra.cnpj);
   if (cnpj && cnpjValido(cnpj)) payload.cnpj = cnpj;
