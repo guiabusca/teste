@@ -569,7 +569,7 @@ footer a{color:var(--coral);font-weight:700}
   .brand-mark{width:39px;height:39px;border-radius:12px}
   .brand-mark svg{width:24px;height:24px}
   .brand-name{font-size:25px}
-  .brand small,.city-chip{display:none}
+  .brand small{display:none}
   .hero{padding:42px 0 22px;gap:25px}
   .hero .lead{font-size:16px}
   .hero-search{max-width:none}
@@ -830,6 +830,18 @@ input,select,textarea{font-size:16px}
 .gmaps{width:18px;height:18px}
 @media(max-width:560px){:root{--display:var(--body)}.row-body h3,.card-body h3,.sheet-info h2,.detail-block h3,.panel h3,.news-card h3,.cta-business h2,.mini-body strong,.brand-name{font-weight:800;letter-spacing:-.01em}.sheet-info h2{font-size:30px;line-height:1.05}}
 
+/* ---- Cidade visível no cabeçalho ---- */
+.city-chip{position:relative;gap:7px;padding:4px 12px 4px 10px;text-align:left}
+.city-label{display:grid;line-height:1.1}
+.city-label small{font-size:10px;font-weight:700;opacity:.8}
+.city-label strong{font-size:14px;font-weight:800;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;color:inherit}
+.site-header .city-chip strong{color:#fff}
+.city-label strong i{font-style:normal;opacity:.75;font-weight:700}
+.city-caret{width:14px;height:14px;flex:none}
+.city-chip select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px}
+.city-chip.is-multi{cursor:pointer}
+.city-chip:focus-within{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:720px){.city-chip{min-height:42px;padding:3px 10px 3px 9px;gap:5px}.city-label strong{font-size:13px;max-width:none;overflow:visible}.city-chip{flex:none}.brand{min-width:0;gap:8px}.brand-mark{flex:none}.brand-name{font-size:21px;white-space:nowrap}.city-label strong i{display:none}.city-label small{font-size:9px}.header-tools{gap:6px}}
 /* ---- Modo "Busca rápida" (celular) ---- */
 .footer-modo{display:none;border:0;background:none;padding:4px 0;color:var(--coral);font:700 12px inherit;cursor:pointer}
 @media(max-width:720px){[data-modo=completo] .footer-modo{display:block}}
@@ -876,7 +888,7 @@ input,select,textarea{font-size:16px}
       <span><strong class="brand-name" id="brand-name">Guia <em>Busca</em></strong><small id="brand-sub">Iracemápolis</small></span>
     </a>
     <div class="header-tools">
-      <span class="city-chip" data-icon="pin"><strong id="city-chip">Iracemápolis, SP</strong></span>
+      <div class="city-chip" id="city-wrap"><strong id="city-chip">Iracemápolis</strong></div>
       <button class="icon-btn" id="theme-toggle" type="button"></button>
     </div>
   </div>
@@ -896,7 +908,7 @@ input,select,textarea{font-size:16px}
 
 <script type="module">
 import { carregarNegocios, carregarConteudo, registrarContato, registrarVisita, registrarBusca, urlFoto, enviarCadastro, TIPOS_NEGOCIO, cnpjValido, formatarCnpj, soDigitos } from './ira-data.js';
-import { BRAND, CATEGORIAS, INTENCOES, PLANOS, PERIODOS, precoPeriodo, MENSAGENS_CLIENTE_PADRAO, preencherMensagem, SINONIMOS, MODO_DEMO, BUSCAS_POPULARES } from './config.js';
+import { BRAND, CIDADES, CATEGORIAS, INTENCOES, PLANOS, PERIODOS, precoPeriodo, MENSAGENS_CLIENTE_PADRAO, preencherMensagem, SINONIMOS, MODO_DEMO, BUSCAS_POPULARES } from './config.js';
 
 /* ==========================================================================
    ÍCONES
@@ -1024,6 +1036,18 @@ const mqMobile = matchMedia('(max-width:720px)');
 state.modo = store.get('modo', 'rapido') === 'completo' ? 'completo' : 'rapido';
 const modoAtual = () => (mqMobile.matches ? state.modo : 'completo');
 const isQuick = () => modoAtual() === 'rapido';
+
+/* Cidades: a primeira de CIDADES é a padrão (empresas sem cidade pertencem a ela). */
+const cidadeById = (id) => CIDADES.find((c) => c.id === id) || CIDADES[0];
+const cidadeDe = (e) => e.cidade || CIDADES[0].id;   // empresa sem cidade = cidade padrão; cidade desconhecida não aparece em lugar nenhum
+let ALL_COMPANIES = [];
+function cidadeInicial() {
+  try { const q = new URLSearchParams(location.search).get('cidade'); if (q && CIDADES.some((c) => c.id === q)) return q; } catch {}
+  const salva = store.get('cidade', '');
+  return CIDADES.some((c) => c.id === salva) ? salva : CIDADES[0].id;
+}
+state.cidade = cidadeInicial();
+{ const c = cidadeById(state.cidade); BRAND.city = c.nome; BRAND.uf = c.uf; }
 
 /* ==========================================================================
    BUSCA INTELIGENTE
@@ -1285,7 +1309,7 @@ function sectionHead(title, sub, go = 'buscar') {
 function globalSearch({ button = true } = {}) {
   return `<div class="global-search">
     <label for="global-q"><span class="sr">Buscar empresa, serviço ou categoria</span><span class="gs-icon">${icon('search')}</span></label>
-    <input id="global-q" type="search" autocomplete="off" placeholder="Buscar farmácia, salão…" value="${esc(state.q)}">
+    <input id="global-q" type="search" autocomplete="off" placeholder="Buscar em ${esc(BRAND.city)}…" value="${esc(state.q)}">
     ${button ? '<button class="btn-go" data-go="buscar" type="button">Buscar</button>' : ''}
   </div>`;
 }
@@ -1718,7 +1742,7 @@ function pushRoute(mode = 'push') {
   try { history[mode === 'push' ? 'pushState' : 'replaceState']({ guia: 1 }, '', h); } catch {}
 }
 
-const BASE_TITLE = document.title;
+let BASE_TITLE = document.title;
 const setTitle = (txt) => { document.title = txt || BASE_TITLE; };
 
 /* De onde veio o visitante: link com ?origem=instagram (ou utm_source). Ajuda a saber qual divulgação funciona. */
@@ -1739,6 +1763,8 @@ function applyRoute(initial = false) {
   captureOrigin(params);
   if (path.startsWith('empresa/')) {
     const id = path.slice(8);
+    const outra = ALL_COMPANIES.find((x) => x.id === id);
+    if (outra && CIDADES.some((c) => c.id === cidadeDe(outra)) && cidadeDe(outra) !== state.cidade) { setCidade(cidadeDe(outra)); render(); }
     if (COMPANIES.some((x) => x.id === id)) { if (!current || current.id !== id) openCompany(id, 0, { fromRoute: true }); return; }
   }
   const next = {
@@ -1973,6 +1999,19 @@ function clearFieldError(id) {
 }
 
 document.addEventListener('change', (event) => {
+  if (event.target.id === 'city-select') {
+    const v = event.target.value;
+    if (v === '__outra') {
+      event.target.value = state.cidade;
+      const msg = `Olá! Quero o ${BRAND.name} na minha cidade. Minha cidade é: `;
+      window.open(`https://wa.me/${digits(BRAND.whatsapp)}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+      return;
+    }
+    if (!$('#veil').hidden) closeCompany();
+    Object.assign(state, { q: '', cat: '', intent: '', bairro: '', view: state.view === 'perfil' || state.view === 'formalizar' ? state.view : 'inicio' });
+    setCidade(v); render(); pushRoute('replace'); scrollTo({ top: 0 });
+    return;
+  }
   if (event.target.id !== 'r-tipo') return;
   const t = event.target.value;
   const box = $('#r-cnpj-box'), hint = $('#r-formal-hint');
@@ -2000,7 +2039,7 @@ document.addEventListener('submit', async (event) => {
   button.disabled = true; button.textContent = 'Enviando…';
   try { const v = (id) => ($(id)?.value || '').trim();
     await enviarCadastro({ nome, categoria, whatsapp, plano, periodo: plano === 'gratis' ? 1 : state.periodo, aceite: true, origem: state.prefill?.origem || state.origem,
-      bairro: v('#r-bairro'), endereco: v('#r-end'), horario: v('#r-hor'), servicos: v('#r-serv'), descricao: v('#r-desc'), telefone: v('#r-tel'), site: v('#r-site'), instagram: v('#r-ig'), tipoNegocio, cnpj: (tipoNegocio === 'cnpj' || tipoNegocio === 'mei') ? cnpjDig : '' }); state.sent = true; state.nomeEnviado = nome; state.error = false; state.planoEnviado = plano; state.periodoEnviado = state.periodo; state.prefill = null; }
+      bairro: v('#r-bairro'), endereco: v('#r-end'), horario: v('#r-hor'), servicos: v('#r-serv'), descricao: v('#r-desc'), telefone: v('#r-tel'), site: v('#r-site'), instagram: v('#r-ig'), cidade: state.cidade, tipoNegocio, cnpj: (tipoNegocio === 'cnpj' || tipoNegocio === 'mei') ? cnpjDig : '' }); state.sent = true; state.nomeEnviado = nome; state.error = false; state.planoEnviado = plano; state.periodoEnviado = state.periodo; state.prefill = null; }
   catch { state.sent = false; state.error = true; }
   render();
   $('#form-msg')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2027,12 +2066,31 @@ $('#view').innerHTML = '<div class="loading">Carregando empresas...</div>';
 (() => {
   const parts = BRAND.name.trim().split(/\s+/), last = parts.pop();
   $('#brand-name').innerHTML = `${esc(parts.join(' '))} <em>${esc(last)}</em>`;
-  $('#brand-sub').textContent = `${BRAND.segmento && BRAND.segmento !== 'Cidade' ? `${BRAND.segmento} · ` : ''}${BRAND.city}`;
-  $('#city-chip').textContent = `${BRAND.city}, ${BRAND.uf}`;
   $('#footer-brand').textContent = BRAND.name;
-  $('#footer-sub').textContent = `Guia de empresas e serviços de ${BRAND.city}`;
   $('.brand')?.setAttribute('aria-label', `${BRAND.name}, início`);
+  paintCidade();
 })();
+
+/* Cabeçalho, rodapé e título refletem a cidade escolhida. */
+function paintCidade() {
+  const multi = CIDADES.length > 1;
+  $('#brand-sub').textContent = `${BRAND.segmento && BRAND.segmento !== 'Cidade' ? `${BRAND.segmento} · ` : ''}${BRAND.city}`;
+  $('#footer-sub').textContent = `Guia de empresas e serviços de ${BRAND.city}`;
+  const wrap = $('#city-wrap');
+  wrap.classList.toggle('is-multi', multi);
+  wrap.innerHTML = `${icon('pin')}<span class="city-label"><small>Você está em</small><strong id="city-chip">${esc(BRAND.city)}<i>, ${esc(BRAND.uf)}</i></strong></span>${multi ? `<svg class="city-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg><select id="city-select" aria-label="Escolher cidade">${CIDADES.map((c) => `<option value="${c.id}" ${c.id === state.cidade ? 'selected' : ''}>${esc(c.nome)} · ${esc(c.uf)}${c.ativa === false ? ' (em breve)' : ''}</option>`).join('')}${BRAND.whatsapp ? '<option value="__outra">Minha cidade não está na lista…</option>' : ''}</select>` : ''}`;
+  BASE_TITLE = `${BRAND.name} ${BRAND.city} · Empresas, serviços e telefones da cidade`;
+  if ($('#veil').hidden) setTitle();
+  document.querySelector('meta[name="description"]')?.setAttribute('content', `Encontre empresas, serviços e soluções de ${BRAND.city} com contato direto, horários e WhatsApp.`);
+}
+
+function setCidade(id, { persist = true } = {}) {
+  const c = cidadeById(id);
+  state.cidade = c.id; BRAND.city = c.nome; BRAND.uf = c.uf;
+  COMPANIES = ALL_COMPANIES.filter((e) => cidadeDe(e) === c.id);
+  if (persist) store.set('cidade', c.id);
+  paintCidade();
+}
 
 /* Dados estruturados para o Google (só com dados reais; no modo demonstração não publica telefones fictícios). */
 function injectSchema() {
@@ -2053,7 +2111,8 @@ window.addEventListener('popstate', () => applyRoute());
 (async () => {
   try {
     const [negocios, conteudo] = await Promise.all([carregarNegocios(), carregarConteudo()]);
-    COMPANIES = negocios.lista;
+    ALL_COMPANIES = negocios.lista;
+    setCidade(state.cidade, { persist: false });
     window.__source = negocios.fonte;
     CONTENT = conteudo;
   } catch (error) {
