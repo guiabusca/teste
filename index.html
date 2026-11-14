@@ -316,9 +316,15 @@ main{min-height:calc(100vh - var(--header-h))}
 .cover img{width:100%;height:100%;display:block;object-fit:contain;transition:transform .6s;background:var(--surface)}
 .business-card:hover .cover img{transform:scale(1.06)}
 .cover::after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,rgba(8,20,45,.65))}
-.badge{position:absolute;z-index:1;left:11px;top:11px;display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.9);color:#15315c;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.card-badges{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:7px}
+.badge{position:static;z-index:auto;display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.9);color:#15315c;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 .badge.premium{background:var(--amber);color:#32220a}
-.badge.verified{left:auto;right:11px;background:var(--green);color:#fff}
+.badge.verified{background:var(--green);color:#fff}
+.row-badges{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-bottom:4px}
+.row-badges .rbadge,.mini-badges .rbadge{position:static;box-shadow:none}
+.rb-demo{background:color-mix(in srgb,var(--blue) 14%,var(--surface));color:var(--navy)}
+.row-verified{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;background:color-mix(in srgb,var(--green) 12%,var(--surface));color:var(--green);font-size:10px;font-weight:800}
+.mini-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
 .save{position:absolute;z-index:2;right:10px;top:53px;width:35px;height:35px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.5);border-radius:50%;background:rgba(9,22,45,.5);color:#fff;backdrop-filter:blur(7px)}
 .save[aria-pressed=true]{background:#fff;color:var(--coral)}
 .save[aria-pressed=true] .ico{fill:currentColor}
@@ -1208,16 +1214,16 @@ const filterChips = () => `<div class="chip-row" role="group" aria-label="Quando
 function card(e, eager = false) {
   const s = status(e);
   const fav = state.favs.has(e.id);
-  const tag = e.plan === 'premium' ? 'Premium' : e.plan === 'destaque' ? 'Destaque' : e.cat;
+  const tag = MODO_DEMO ? (PLANOS[e.plan]?.label || e.plan) : (e.plan === 'premium' ? 'Premium' : e.plan === 'destaque' ? 'Destaque' : e.cat);
+  const tagClass = e.plan === 'premium' ? 'premium' : '';
 
   return `<article class="business-card">
     <button class="cover" data-open="${esc(e.id)}" aria-label="Abrir perfil de ${esc(e.name)}">
       <img loading="${eager ? 'eager' : 'lazy'}" alt="${esc(e.name)}" src="${urlFoto(e.id, 0, e.ver)}">
-      <span class="badge ${e.plan === 'premium' ? 'premium' : ''}">${esc(tag)}</span>
-      ${e.verified ? `<span class="badge verified">${icon('check')} Verificado</span>` : ''}
     </button>
     <button class="save" data-fav="${esc(e.id)}" aria-pressed="${fav}" aria-label="${fav ? 'Remover dos favoritos:' : 'Salvar nos favoritos:'} ${esc(e.name)}">${icon('heart')}</button>
     <div class="card-body">
+      <div class="card-badges"><span class="badge ${tagClass}">${esc(tag)}</span>${e.verified ? `<span class="badge verified">${icon('check')} Verificado</span>` : ''}</div>
       <h3>${esc(e.name)}</h3>
       <div class="card-meta">${ratingLabel(e)}<span>·</span><span>${esc(e.cat)}</span></div>
       <div class="open-status ${s.on ? '' : 'closed'}"><span class="dot"></span>${esc(s.on ? 'Aberto agora' : s.text)}</div>
@@ -1247,7 +1253,7 @@ function rowCard(e, opt = {}) {
   const fav = state.favs.has(e.id);
   const wa = opt.wa ?? hasWa(e);
   const prem = e.plan === 'premium', dest = e.plan === 'destaque';
-  const ribbon = prem ? `<span class="rbadge rb-premium">★ Premium</span>` : dest ? `<span class="rbadge rb-destaque">Destaque</span>` : '';
+  const ribbon = MODO_DEMO ? `<span class="rbadge rb-demo">${esc(PLANOS[e.plan]?.label || e.plan)}</span>` : (prem ? `<span class="rbadge rb-premium">★ Premium</span>` : dest ? `<span class="rbadge rb-destaque">Destaque</span>` : '');
   const thumb = opt.preview
     ? `<span class="row-thumb ph">${icon('store')}</span>`
     : `<img class="row-thumb" loading="lazy" alt="" src="${urlFoto(e.id, 0, e.ver)}">`;
@@ -1256,9 +1262,10 @@ function rowCard(e, opt = {}) {
   return `<article class="row-card plan-${esc(e.plan)}${opt.preview ? ' is-preview' : ''}">
     ${opt.preview ? '' : `<button class="row-open" data-open="${esc(e.id)}" aria-label="Abrir ficha de ${esc(e.name)}"></button>`}
     <div class="row-top">
-      <div class="row-media">${thumb}${ribbon}</div>
+      <div class="row-media">${thumb}</div>
       <div class="row-body">
-        <h3>${esc(e.name)}${e.verified ? `<span class="vcheck" title="Perfil verificado">${icon('check')}</span>` : ''}</h3>
+        <div class="row-badges">${ribbon}${e.verified ? '<span class="row-verified">✓ Perfil verificado</span>' : ''}</div>
+        <h3>${esc(e.name)}</h3>
         <div class="row-sub">${ratingLabel(e)}</div>
         <div class="row-sub">${esc(e.cat)} · ${esc(e.bairro || BRAND.city)}${dist}${selosTipo(e) ? ' ' + selosTipo(e) : ''}</div>
         <div class="open-status ${s.on ? '' : 'closed'}"><span class="dot"></span>${esc(s.text)}</div>
@@ -1278,10 +1285,10 @@ function rowCard(e, opt = {}) {
 /* Cartão pequeno para o carrossel de destaques da página inicial */
 function miniCard(e) {
   const s = status(e);
-  const label = e.plan === 'premium' ? '★ Premium' : 'Destaque';
+  const label = MODO_DEMO ? (PLANOS[e.plan]?.label || e.plan) : (e.plan === 'premium' ? '★ Premium' : 'Destaque');
   return `<button class="mini-card" data-open="${esc(e.id)}" aria-label="Abrir ficha de ${esc(e.name)}">
-    <span class="mini-img"><img loading="lazy" alt="" src="${urlFoto(e.id, 0, e.ver)}"><span class="rbadge ${e.plan === 'premium' ? 'rb-premium' : 'rb-destaque'}">${label}</span></span>
-    <span class="mini-body"><strong>${esc(e.name)}${e.verified ? `<span class="vcheck">${icon('check')}</span>` : ''}</strong>
+    <span class="mini-img"><img loading="lazy" alt="" src="${urlFoto(e.id, 0, e.ver)}"></span>
+    <span class="mini-body"><span class="mini-badges"><span class="rbadge ${MODO_DEMO ? 'rb-demo' : (e.plan === 'premium' ? 'rb-premium' : 'rb-destaque')}">${label}</span>${e.verified ? '<span class="row-verified">✓ Verificado</span>' : ''}</span><strong>${esc(e.name)}</strong>
     <small>${esc(e.cat)} · ${esc(e.bairro || BRAND.city)}</small>
     <span class="open-status ${s.on ? '' : 'closed'}"><span class="dot"></span>${esc(s.on ? 'Aberto agora' : s.text)}</span></span>
   </button>`;
@@ -1592,9 +1599,9 @@ function profileView() {
     <div class="profile-layout">
       <form class="form-card" id="reg" novalidate>
         <div id="form-msg" role="status">
-          ${state.prefill?.nome ? `<div class="notice prefill">Você está confirmando o perfil de <strong>${esc(state.prefill.nome)}</strong>. Confira o nome e informe o WhatsApp da empresa.</div>` : ''}
+          ${state.prefill?.nome ? `<div class="notice prefill">Você está solicitando a reivindicação do perfil de <strong>${esc(state.prefill.nome)}</strong>. O acesso só será liberado depois da confirmação pela equipe do Guia Busca.</div>` : ''}
           ${state.error ? '<div class="notice err">Não foi possível enviar agora. Tente novamente em instantes.</div>' : ''}
-          ${state.sent ? `<div class="notice ok">Cadastro recebido (plano ${esc(PLANOS[state.planoEnviado]?.label || 'Gratuito')}${state.planoEnviado && state.planoEnviado !== 'gratis' && state.periodoEnviado > 1 ? `, ${esc(PERIODOS.find((o) => o.meses === state.periodoEnviado)?.label.toLowerCase() || '')}` : ''}). Vamos confirmar o WhatsApp e publicar seu perfil em até 1 dia útil.${avisoCadastroWA()}</div>` : ''}
+          ${state.sent ? `<div class="notice ok">${state.prefill?.origem === 'reivindicacao' ? 'Solicitação de reivindicação recebida. Nossa equipe entrará em contato para confirmar sua relação com a empresa antes de liberar qualquer alteração.' : `Cadastro recebido (plano ${esc(PLANOS[state.planoEnviado]?.label || 'Gratuito')}${state.planoEnviado && state.planoEnviado !== 'gratis' && state.periodoEnviado > 1 ? `, ${esc(PERIODOS.find((o) => o.meses === state.periodoEnviado)?.label.toLowerCase() || '')}` : ''}). Vamos confirmar o WhatsApp e publicar seu perfil em até 1 dia útil.${avisoCadastroWA()}`}</div>` : ''}
         </div>
         <label>Nome da empresa<input id="r-n" required maxlength="80" autocomplete="organization" value="${esc(state.prefill?.nome || '')}" placeholder="Ex.: Padaria Pão de Praça" aria-describedby="r-n-err"><small class="field-err" id="r-n-err" role="alert" hidden></small></label>
         <label>Categoria<select id="r-c">${CATEGORIAS.map((c) => `<option>${esc(c.nome)}</option>`).join('')}</select></label>
@@ -1643,14 +1650,15 @@ function hoursRows(e) {
 function claimBlock(e) {
   const base = (BRAND.siteUrl || location.origin).replace(/\/$/, '');
   const ficha = `${base}/#empresa/${e.id}`;
-  const claim = guideLink(`Olá! Sou o responsável por "${e.name}" e quero confirmar e completar meu perfil no ${BRAND.name} ${BRAND.city}. ${ficha}`);
+  const claim = guideLink(`Olá! Quero reivindicar o perfil de "${e.name}" no ${BRAND.name} ${BRAND.city}. Entendo que a solicitação será analisada e que nenhuma alteração será liberada antes da confirmação. ${ficha}`);
   const error = guideLink(`Olá! Quero corrigir ou remover as informações de "${e.name}" no ${BRAND.name} ${BRAND.city}. ${ficha}`);
   const errorLink = `<a class="link-quiet" href="${esc(error || 'privacidade.html')}" target="_blank" rel="noopener">Informar erro ou pedir remoção</a>`;
   if (e.verified) return `<div class="claim small"><span>Perfil confirmado pela empresa.</span>${errorLink}</div>`;
   return `<div class="claim"><strong>Você é o responsável por esta empresa?</strong>
-    <p>Confirme os dados com o ${esc(BRAND.name)}, adicione fotos e conte o que você oferece. É grátis.</p>
+    <p>Solicite a reivindicação deste perfil. A equipe do ${esc(BRAND.name)} confirmará sua relação com a empresa antes de liberar qualquer alteração.</p>
+    ${MODO_DEMO ? '<p class="muted"><strong>Modo demonstração:</strong> esta solicitação é apenas ilustrativa e não altera os dados fictícios.</p>' : ''}
     <div class="claim-actions">
-      ${claim ? `<a class="btn btn-claim" data-track-claim="${esc(e.id)}" href="${esc(claim)}" target="_blank" rel="noopener">${icon('store')}<span>Sou o dono · atualizar perfil</span></a>` : `<button class="btn btn-claim" type="button" data-claim="${esc(e.id)}">${icon('store')}<span>Sou o dono · atualizar perfil</span></button>`}
+      ${claim ? `<a class="btn btn-claim" data-track-claim="${esc(e.id)}" href="${esc(claim)}" target="_blank" rel="noopener">${icon('store')}<span>Reivindicar este perfil</span></a>` : `<button class="btn btn-claim" type="button" data-claim="${esc(e.id)}">${icon('store')}<span>Reivindicar este perfil</span></button>`}
       ${errorLink}
     </div></div>`;
 }
