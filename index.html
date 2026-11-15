@@ -184,7 +184,7 @@ main{min-height:calc(100vh - var(--header-h))}
 .mock-num{font-size:12px;color:var(--muted)}.mock-num .ico{width:15px;height:15px;color:#25d366;vertical-align:-3px}.mock-num b{color:var(--ink)}
 .mock-btns{flex-wrap:wrap}
 .mock-gal{display:flex;gap:4px;height:74px;position:relative;overflow:hidden;border-radius:9px}
-.mock-gal span{flex:1;min-width:0;border-radius:9px;background:linear-gradient(135deg,var(--surface-2),color-mix(in srgb,var(--coral) 18%,var(--surface-2)));display:grid;place-items:center;color:var(--coral)}
+.mock-gal span,.mock-gal img{flex:1;min-width:0;border-radius:9px;background:linear-gradient(135deg,var(--surface-2),color-mix(in srgb,var(--coral) 18%,var(--surface-2)));display:grid;place-items:center;color:var(--coral);object-fit:cover;width:0}
 .mock-gal span.big{flex:2.4}
 .mock-gal .ico{width:26px;height:26px}
 .mock-gal em{position:absolute;right:5px;bottom:5px;padding:1px 7px;border-radius:999px;background:rgba(16,36,72,.75);color:#fff;font-size:11px;font-style:normal;font-weight:800}
@@ -451,12 +451,23 @@ main{min-height:calc(100vh - var(--header-h))}
 .notice.err{background:color-mix(in srgb,var(--coral) 12%,transparent);color:var(--coral)}
 
 /* --- Cadastro com escolha de plano --- */
-.plan-picker{border:0;margin:0 0 12px;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.plan-picker legend{font-weight:700;font-size:13px;margin-bottom:8px;padding:0}
-.form-card .plan-opt{display:flex;align-items:center;gap:9px;margin:0;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:var(--bg);cursor:pointer;font-weight:600}
-.form-card .plan-opt input{width:auto;padding:0;margin:0;accent-color:var(--coral)}
-.plan-opt span{display:grid;line-height:1.25}.plan-opt small{color:var(--muted);font-weight:600;font-size:11px}
-.plan-opt.on{border-color:var(--coral);background:color-mix(in srgb,var(--coral) 8%,var(--bg))}
+.plan-picker{border:0;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.plan-picker legend{grid-column:1/-1;margin:0 0 2px;padding:0;font-size:16px;font-weight:800}
+.plan-picker::after{content:'Compare os recursos e escolha como sua empresa vai aparecer no guia.';grid-column:1/-1;order:-1;margin-bottom:2px;color:var(--muted);font-size:12px}
+.form-card .plan-opt{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:5px;min-height:142px;margin:0;padding:14px;border:1px solid var(--line);border-radius:17px;background:var(--bg);cursor:pointer;font-weight:600;transition:transform .18s,border-color .18s,box-shadow .18s}
+.form-card .plan-opt:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--coral) 55%,var(--line));box-shadow:var(--shadow-sm)}
+.form-card .plan-opt input{position:absolute;opacity:0;pointer-events:none}
+.plan-opt-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.plan-opt-name{font:700 22px/1 var(--display);color:var(--ink)}
+.plan-opt-price{display:block;color:var(--coral);font-size:15px;font-weight:800}
+.plan-opt-price small{color:var(--muted);font-size:10px;font-weight:600}
+.plan-opt-description{display:block;min-height:31px;color:var(--muted);font-size:11px;line-height:1.35}
+.plan-opt-photos{display:inline-flex;align-items:center;gap:5px;width:max-content;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--navy) 8%,var(--surface));color:var(--navy);font-size:10px;font-weight:800}
+.plan-opt-hook{margin-top:auto;color:var(--coral);font-size:10px;font-weight:800}
+.plan-opt-featured{border-color:#d9b25e!important;background:linear-gradient(145deg,color-mix(in srgb,#f3d27a 18%,var(--surface)),var(--bg))!important}
+.plan-opt-featured::before{content:'MAIS ESCOLHIDO';position:absolute;right:10px;top:-10px;padding:4px 8px;border-radius:999px;background:var(--amber);color:#32220a;font-size:9px;font-weight:900;letter-spacing:.06em}
+.plan-opt.on{border-color:var(--coral);box-shadow:0 0 0 3px color-mix(in srgb,var(--coral) 15%,transparent),var(--shadow-sm);background:color-mix(in srgb,var(--coral) 7%,var(--bg))}
+.plan-opt.on .plan-opt-name{color:var(--coral)}
 .plan-benefits{border:1px solid var(--line);border-radius:16px;padding:14px 15px;margin-bottom:14px;background:color-mix(in srgb,var(--coral) 5%,var(--surface))}
 .plan-benefits h4{margin:0 0 8px;font:700 21px/1 var(--display)}
 .plan-benefits ul{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
@@ -472,7 +483,8 @@ button.plan-mini{text-align:left;font:inherit;color:inherit;cursor:pointer;width
 .social-btn .ico{width:18px;height:18px}
 .social-btn.ig{background:linear-gradient(135deg,#7a3fc0,#d6366f 55%,#f08a3c)}
 .social-btn.fb{background:#1877f2}
-@media(max-width:560px){.plan-picker{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.plan-picker{grid-template-columns:1fr 1fr}.form-card .plan-opt{min-height:150px;padding:12px}.plan-opt-name{font-size:20px}}
+@media(max-width:390px){.plan-picker{grid-template-columns:1fr}}
 .plans-mini{display:grid;gap:10px;align-content:start}
 .plan-mini{border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:16px}
 .plan-mini h3{margin:0;font:700 23px/1 var(--display)}
@@ -748,6 +760,21 @@ input,select,textarea{font-size:16px}
 .link-quiet{font-size:13px;color:var(--muted);text-decoration:underline;display:inline-flex;align-items:center;min-height:44px;background:none;border:0;padding:0;cursor:pointer;font-weight:600}
 .claim.small{display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);border-style:solid;padding:6px 14px}
 .claim.small .link-quiet{min-height:40px}
+.demo-plan-banner{position:relative;overflow:hidden;margin:0 0 16px;padding:14px 16px;border:1.5px solid color-mix(in srgb,var(--coral) 42%,var(--line));border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--coral) 12%,var(--surface)),var(--surface));box-shadow:var(--shadow-sm)}
+.demo-plan-banner::after{content:'DEMO';position:absolute;right:-10px;bottom:-16px;font:800 54px/1 var(--body);letter-spacing:.08em;color:color-mix(in srgb,var(--coral) 10%,transparent);transform:rotate(-12deg);pointer-events:none}
+.demo-plan-top{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.demo-plan-kicker{display:block;margin-bottom:3px;color:var(--coral);font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.demo-plan-name{display:block;font:700 26px/1 var(--display);color:var(--ink)}
+.demo-plan-price{display:block;margin-top:4px;color:var(--muted);font-size:12px}
+.demo-plan-stamp{flex:none;padding:7px 10px;border-radius:999px;background:var(--coral);color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.demo-plan-stats{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 10px}
+.demo-plan-stats span{padding:5px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:11px;font-weight:700}
+.demo-plan-benefits{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.demo-plan-benefits li{display:inline-flex;align-items:center;gap:4px;color:var(--ink);font-size:11px;font-weight:600}
+.demo-plan-benefits .ico{width:14px;height:14px;color:var(--green)}
+.demo-plan-upgrade{position:relative;z-index:1;margin:10px 0 0;padding-top:9px;border-top:1px dashed var(--line);color:var(--muted);font-size:11px}
+.demo-plan-upgrade b{color:var(--coral)}
+.demo-photo-watermark{position:absolute;z-index:2;left:12px;bottom:12px;padding:5px 9px;border:1px solid rgba(255,255,255,.45);border-radius:999px;background:rgba(16,36,72,.78);color:#fff;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(6px)}
 .notice.prefill{margin-bottom:12px}
 
 @media(prefers-reduced-motion:reduce){
@@ -1515,7 +1542,9 @@ function planPreviewHTML(id) {
   const e = { id: 'preview', name: nome, cat, bairro: 'Centro', plan: id, verified: !!f.selo, n: [4.8, 32], delivery: !!f.entrega, f: 0, t: '30–40 min' };
   const row = rowCard(e, { preview: true, wa: !!f.whatsapp, num: '(19) 99999-0000', status: { on: true, text: 'Aberto agora · fecha às 18h' } });
   const tiles = Math.min(p.photos, 4);
-  const gal = `<div class="mock-gal">${Array.from({ length: tiles }, (_, i) => `<span class="${i === 0 ? 'big' : ''}">${i === 0 ? icon('store') : ''}</span>`).join('')}${p.photos > 4 ? `<em>+${p.photos - 4}</em>` : ''}</div>`;
+  const demoSamples = { gratis: 'demo-eletricista-carlos', presenca: 'demo-padaria-pao-de-praca', destaque: 'demo-auto-socorro', premium: 'demo-farmacia-vida' };
+  const sampleId = demoSamples[id];
+  const gal = MODO_DEMO && sampleId ? `<div class="mock-gal">${Array.from({ length: tiles }, (_, i) => `<img class="${i === 0 ? 'big' : ''}" src="${urlFoto(sampleId, i, 'img2026b')}" alt="Exemplo ${esc(p.label)}">`).join('')}${p.photos > 4 ? `<em>+${p.photos - 4}</em>` : ''}</div>` : `<div class="mock-gal">${Array.from({ length: tiles }, (_, i) => `<span class="${i === 0 ? 'big' : ''}">${i === 0 ? icon('store') : ''}</span>`).join('')}${p.photos > 4 ? `<em>+${p.photos - 4}</em>` : ''}</div>`;
   const mock = `<div class="mock">${gal}
     <div class="mock-name">${esc(nome)}${f.selo ? `<span class="vcheck">${icon('check')}</span>` : ''}</div>
     <div class="mock-sub">${esc(cat)} · Centro · Aberto agora</div>
@@ -1550,6 +1579,8 @@ function selectPlan(id) {
   $$('.plan-mini').forEach((card) => { const on = card.dataset.plano === id; card.classList.toggle('on', on); card.setAttribute('aria-pressed', on); });
   const box = $('#plan-benefits');
   if (box) box.innerHTML = planBenefitsHTML(id);
+  const submit = $('#r-submit');
+  if (submit) submit.textContent = `Quero começar no ${PLANOS[id].label} →`;
 }
 
 /* Selos de formalização: informativos, nunca excluem o negócio do guia. */
@@ -1610,7 +1641,7 @@ function profileView() {
         <p class="more-hint formal-hint" id="r-formal-hint" hidden>Sem problema! Você pode aparecer no guia mesmo sem CNPJ. <a href="#formalizar">Veja como virar MEI de graça →</a></p>
         <label>WhatsApp da empresa<input id="r-w" type="tel" required inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="(19) 99999-0000" aria-describedby="r-w-err"><small class="field-err" id="r-w-err" role="alert" hidden></small></label>
         <fieldset class="plan-picker"><legend>Escolha seu plano</legend>
-          ${Object.entries(PLANOS).map(([id, p]) => `<label class="plan-opt ${state.plano === id ? 'on' : ''}"><input type="radio" name="r-plano" value="${id}" ${state.plano === id ? 'checked' : ''}><span>${esc(p.label)}<small>${p.price ? `${brl(p.price)}/mês · ${brl(precoPeriodo(id, 1).porDia)}/dia` : 'sem custo'}</small></span></label>`).join('')}
+          ${Object.entries(PLANOS).map(([id, p]) => `<label class="plan-opt ${state.plano === id ? 'on' : ''} ${id === 'premium' ? 'plan-opt-featured' : ''}"><input type="radio" name="r-plano" value="${id}" ${state.plano === id ? 'checked' : ''}><span class="plan-opt-top"><strong class="plan-opt-name">${esc(p.label)}</strong><span class="plan-opt-price">${p.price ? `${brl(p.price)}<small>/mês</small>` : 'Grátis'}</span></span><span class="plan-opt-description">${esc(p.description)}</span><span class="plan-opt-photos">${p.photos} ${p.photos === 1 ? 'foto' : 'fotos'} incluída${p.photos === 1 ? '' : 's'}</span><span class="plan-opt-hook">${id === 'gratis' ? 'Comece sem custo' : id === 'premium' ? 'Sua vitrine completa' : `Suba para ${esc(PLANOS[p.proximo]?.label || 'mais visibilidade')}`}</span></label>`).join('')}
         </fieldset>
         <div id="plan-benefits" class="plan-benefits" aria-live="polite">${planBenefitsHTML(state.plano)}</div>
         <details class="more-info"><summary>Quer adiantar o seu cadastro? <small>(opcional)</small></summary>
@@ -1626,7 +1657,7 @@ function profileView() {
         </details>
         <label class="consent"><input type="checkbox" id="r-ok"><span>Concordo em ser contatado por WhatsApp pelo ${esc(BRAND.name)} e com a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>
         <small class="field-err" id="r-ok-err" role="alert" hidden></small>
-        <button type="submit">Enviar cadastro →</button>
+        <button type="submit" id="r-submit">Quero começar no ${esc(PLANOS[state.plano]?.label || 'Gratuito')} →</button>
       </form>
       <aside class="how" aria-label="Como funciona"><h3>Como funciona</h3>
         <div class="how-step"><b>1</b><div><strong>Você envia os dados</strong><span>Leva menos de um minuto.</span></div></div>
@@ -1663,6 +1694,19 @@ function claimBlock(e) {
     </div></div>`;
 }
 
+function demoPlanBlock(e) {
+  if (!MODO_DEMO) return '';
+  const p = PLANOS[e.plan] || PLANOS.gratis;
+  const next = p.proximo ? PLANOS[p.proximo] : null;
+  const price = p.price ? `${brl(p.price)}/mês` : 'sem custo';
+  const benefits = (p.benefits || []).slice(0, 4).map((b) => `<li>${icon('check')}<span>${esc(b)}</span></li>`).join('');
+  return `<section class="demo-plan-banner" aria-label="Demonstração do plano ${esc(p.label)}">
+    <div class="demo-plan-top"><div><span class="demo-plan-kicker">Demonstração · plano contratado</span><strong class="demo-plan-name">${esc(p.label)}</strong><span class="demo-plan-price">${price} · como este perfil aparece no Guia Busca</span></div><span class="demo-plan-stamp">Perfil demo</span></div>
+    <div class="demo-plan-stats"><span>${e.photos} ${e.photos === 1 ? 'foto publicada' : 'fotos publicadas'}</span>${p.features?.selo ? '<span>Selo verificado</span>' : ''}${p.features?.whatsapp ? '<span>WhatsApp em destaque</span>' : ''}${p.features?.entrega ? '<span>Entrega em destaque</span>' : ''}</div>
+    <ul class="demo-plan-benefits">${benefits}</ul>
+    ${next ? `<p class="demo-plan-upgrade">Gatilho de upgrade: no <b>${esc(next.label)}</b>, este perfil ganha ${esc(next.novidades.join(', '))}.</p>` : '<p class="demo-plan-upgrade"><b>Plano mais completo:</b> máxima exposição e todos os recursos do guia.</p>'}
+  </section>`;
+}
 function sheetHTML(e) {
   const s = status(e);
   const services = e.services?.length ? `<div class="detail-block"><h3>Serviços e produtos</h3><div class="service-list">${e.services.map((x) => `<span class="service"><span>${esc(x.nome || x)}</span>${x.preco ? `<small>${esc(x.preco)}</small>` : ''}</span>`).join('')}</div></div>` : '';
@@ -1681,6 +1725,7 @@ function sheetHTML(e) {
         <div class="sheet-media-inner">
           <div class="sheet-gallery">
             <img id="gallery-image" src="${urlFoto(e.id, galleryIndex, e.ver)}" alt="${esc(e.name)}, foto ${galleryIndex + 1}">
+            ${MODO_DEMO ? `<span class="demo-photo-watermark">DEMO · ${esc(PLANOS[e.plan]?.label || e.plan)}</span>` : ''}
             ${nav}
             <span class="gallery-count" id="gallery-count">${galleryIndex + 1} / ${e.photos}</span>
           </div>
@@ -1689,6 +1734,7 @@ function sheetHTML(e) {
       </div>
       <div class="sheet-info">
         <div class="eyebrow">${esc(e.cat)}${e.sub ? ` · ${esc(e.sub)}` : ''}</div>
+        ${demoPlanBlock(e)}
         <h2 id="sheet-title">${esc(e.name)}</h2>
         <div class="category-line">${ratingLabel(e)} · ${esc(e.bairro)}</div>
         <div class="detail-status">
